@@ -7,32 +7,14 @@ import imp
 import subprocess
 import platform
 
-from setuptools import setup, find_packages, Command
-from setuptools.command.test import test as TestCommand
-
-class PyTest(TestCommand):
-    user_options = [('pytest-args=', 'a', "Arguments to pass to py.test")]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def finalize_options(self):
-        TestCommand.finalize_options(self)
-        # self.test_args = []
-        # self.test_suite = True
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
+from setuptools import setup, find_packages
 
 
 # Add the current directory to the module search path.
 sys.path.append('.')
 
 # # Constants
-CODE_DIRECTORY = 'vendorcentral'
+CODE_DIRECTORY = 'remittance'
 # DOCS_DIRECTORY = 'docs'
 TESTS_DIRECTORY = 'tests'
 #DATA_DIRECTORY = 'gnucash_books'
@@ -111,18 +93,10 @@ setup_dict = dict(
 #                         'sqlite3',
 #                         'pandas',
                      ] + python_version_specific_requires,
-    # Allow tests to be run with `python setup.py test'.
-    tests_require=[
-        'pytest',
-        'py',
-    ],
     # console=['scripts/piecash_ledger.py','scripts/piecash_toqif.py'],
     scripts=[],
-    cmdclass = {'test': PyTest},
-    test_suite="tests",
     zip_safe=False,  # don't use eggs
 )
-
 
 def main():
     setup(**setup_dict)
