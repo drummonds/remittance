@@ -5,10 +5,10 @@ Information describing the project.
 
 # The package name, which is also the "UNIX name" for the project.
 package = 'remittance'
-project = "Python Amazon Vendor Central tools"
+project = "Python Remittance tools"
 project_no_spaces = project.replace(' ', '')
-version = '0.0.0'
-description = 'A pythonic interface to varous remittance docs eg AIS.'
+version = '0.0.1'
+description = 'A pythonic interface to varous remittance docs and Sage eg AIS.'
 authors = ['drummonds']
 authors_string = ', '.join(authors)
 emails = ['hum3@drummond.info']

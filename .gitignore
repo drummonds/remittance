@@ -18,4 +18,7 @@ Management*.xlsx
 # Ignore .env configuration files
 .env
 
+# This is a place I store all my files while using the code
+playpen
+
 

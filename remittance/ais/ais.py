@@ -28,6 +28,7 @@ from sys import exc_info
 class RemittanceError(Exception):
     pass
 
+
 class SubDocument():
     """Holds one document table
 
