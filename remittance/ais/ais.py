@@ -175,11 +175,7 @@ class RemittanceDoc():
         def check_df_series_add_up():
             col_total = p(self.df['Due'].sum())
             total = p(self.sum_total)
-            if col_total != total:
-                print("Column total {} doesn't equal stated total {}".format(col_total, total))
-                self.checked = False
-            else: # Just to confirm actually doing what I expect
-                print("Column total {} equals stated total {}".format(col_total, total))
+            self.checked = col_total == total
 
         self.xl = pd.ExcelFile(filename)
         self.sheet = self.xl.book.sheet_by_name('Sheet1')

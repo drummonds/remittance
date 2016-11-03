@@ -8,4 +8,5 @@ from .remittance import RemittanceException, Remittance, Invoice, DebitNote, Age
 from .conversion import ParseItems
 
 from .ais import RemittanceDoc, RemittanceError
+from .ais import ParseError, ParseItems
 from .sage import Sage

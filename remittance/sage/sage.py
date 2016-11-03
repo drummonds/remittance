@@ -41,7 +41,9 @@ AND ah.DELETED_FLAG = 0
         """
         Using the invoice number we can look up the field.  The accounting database contains line entries
         """
-        df = self.sqldata[self.sqldata['INV_REF'].str.contains(str(i))]
+        df = self.sqldata[(self.sqldata['TYPE'] == 'SI')
+                & (self.sqldata['INV_REF'].str.contains(str(i)))
+                ]
         result = ''
         if len(df) == 1: # Have found some line entries for this invoice reference
             return df.iloc[0][field]
