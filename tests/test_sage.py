@@ -61,9 +61,8 @@ class SageTestCase(TestCase):
         sage.enrich_remittance_doc(ais_doc)
         assert ais_doc.checked
         ais = Remittance()
-        ais.sqldata = sage.sqldata  # TODO a bit ugly
         pli = ParseItems(ais_doc, ais)
-        sif = SageImportFile(ais,'Remittance_' + ais.supplier, file_dir=TEST_DIR)
+        sif = SageImportFile(ais, sage.sqldata, 'Remittance_' + ais.supplier, file_dir=TEST_DIR)
         fn = sif.si.filename
         if False:  # Production run tidies up afterwards and makes sure all can't run twice
             time.sleep(0.5)

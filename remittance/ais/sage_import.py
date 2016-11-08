@@ -15,7 +15,8 @@ class SageImportFile:
     create a file ready for Sage Import.
     Typically it will run all on the create of the class"""
 
-    def __init__(self, remittance, name='', file_dir='', auto_run=True):
+    def __init__(self, remittance, sqldata, name='', file_dir='', auto_run=True):
+        self.sqldata = sqldata
         self.logger = logging.getLogger('SageImportFile')
         self.logger.info('-- Starting SageImportFile setup')
         self.remittance = remittance
@@ -38,8 +39,7 @@ class SageImportFile:
             self.close_file()
 
     def check_for_transactions_on_this_day(self, tran_type, account):
-        sqldata = self.remittance.sqldata
-        test3 = sqldata[sqldata['TYPE'] == tran_type]
+        test3 = self.sqldata[self.sqldata['TYPE'] == tran_type]
         test2 = test3[test3['ACCOUNT_REF'] == account]
         test = test2[test2['DATE'] == self.tran_date]
         l = len(test)
@@ -63,8 +63,7 @@ class SageImportFile:
 
 
     def check_accruals_for_stop_note(self, stop_note):
-        sqldata = self.remittance.sqldata
-        test3 = sqldata[sqldata['TYPE'] == 'JD']
+        test3 = self.sqldata[self.sqldata['TYPE'] == 'JD']
         test2 = test3[test3['ACCOUNT_REF'] == 2109]
         test = test2[test2['DETAILS'].str.contains(stop_note)]
         l = len(test)
