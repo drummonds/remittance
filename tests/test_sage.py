@@ -45,11 +45,11 @@ class SageTestCase(TestCase):
 
     def test_sage_number(self):
         sage = Sage()
-        self.assertEqual('1100', sage.using_invoice_get(57735, 'ACCOUNT_REF'))
-        self.assertEqual('X322', sage.using_invoice_get(57735, 'ALT_REF'))
-        self.assertEqual(Decimal('685.70'), p(sage.using_invoice_get(57735, 'NET_AMOUNT')))
-        self.assertEqual('X322', sage.using_invoice_get('57735', 'ALT_REF'))
-        self.assertEqual(Decimal('685.70'), p(sage.using_invoice_get('57735', 'NET_AMOUNT')))
+        self.assertEqual('1100', sage.using_reference_get(57735, 'ACCOUNT_REF'))
+        self.assertEqual('X322', sage.using_reference_get(57735, 'ALT_REF'))
+        self.assertEqual(Decimal('685.70'), p(sage.using_reference_get(57735, 'NET_AMOUNT')))
+        self.assertEqual('X322', sage.using_reference_get('57735', 'ALT_REF'))
+        self.assertEqual(Decimal('685.70'), p(sage.using_reference_get('57735', 'NET_AMOUNT')))
 
     def test_sage_enrich(self):
         self.cleanup()
