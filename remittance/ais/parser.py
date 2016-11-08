@@ -66,7 +66,10 @@ class ParseItems:
         # codes.  this should tally with code from the reference.
         # print('Member code = {}, {}, MC {}, Ref {}'.format(item.member_code, type(item.member_code),
         #                                        row['Member Code'], row['Your Ref']))
-        v = p(row['Sage_Net_Amount'])
+        try:
+            v = p(row['Sage_Net_Amount'])
+        except TypeError:  # Eg if NetAmount is none
+            v = math.nan
         if math.isnan(v):
             # if have value treat using Sage data, if not then used own data nan
             item._gross_amount = p(row['Value'])
@@ -74,9 +77,7 @@ class ParseItems:
             item._net_amount = p(item.gross_amount - item.vat)
             item._discount = p(row['Discount'])
             item._set('adj_net_receipt', item.gross_amount)
-            print('Parse row (no Sage Data) {}'.format(item._gross_amount))
         else:
-            print('Parse row {}'.format(v))
             item.set_values(p(row['Sage_Net_Amount']), p(row['Sage_VAT_Amount']), p(row['Discount']))
             self.check_row(item, row)
         # item.net_amount = p(row['Sage_Net_Amount']) # Triggers all the calculations but has to be slightly inaccurate as cannot
@@ -99,7 +100,6 @@ class ParseItems:
 
         # print('PPD Member code = {}, {}, MC {}, Ref {}'.format(item.member_code, type(item.member_code),
         #                                        row['Member Code'], row['Your Ref']))
-        print(' PPD Parse row : {}'.format(row))
         if p(row['Discount']) != p(0):
             raise RemittanceError('PPD Member code = {} discount should be zero but is {}'.format(
                 item.member_code, (row['Discount'])))
@@ -155,3 +155,6 @@ class ParseItems:
         remittance.supplier = 'AIS'
         remittance.total = doc.sum_total
         self.doc.df.apply(self.add_item, axis=1)
+
+    def report_df(self):
+        return self.doc.df

@@ -9,4 +9,5 @@ from .conversion import ParseItems
 
 from .ais import RemittanceDoc, RemittanceError
 from .ais import ParseError, ParseItems
-from .sage import Sage
+from .ais import SageImportFile
+

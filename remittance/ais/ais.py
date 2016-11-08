@@ -199,7 +199,6 @@ class RemittanceDoc():
         check_df_series_add_up()
         self.checked = True # raises an error if not
 
-
     def __str__(self):
         try:
             s = 'Title = {}\n'.format(self.title)

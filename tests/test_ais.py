@@ -61,7 +61,7 @@ class AISTestCase(TestCase):
         ais_doc = RemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
         self.assertEqual(ais_doc.sum_total, p('3929.82'))
         self.assertEqual(len(ais_doc.df), 10)
-        self.assertEqual(ais_doc.checked)
+        self.assertTrue(ais_doc.checked)
         ais_doc += ais_doc
         self.assertEqual(ais_doc.sum_total, p('7859.64'))
         # Problems with addition This only works in a very specific case.  RemittanceDoc depends on totals
