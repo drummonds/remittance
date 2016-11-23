@@ -156,7 +156,7 @@ class Remittance():
         # Create running balance
         self.running_bank_balance = 0
         for i in self.items:
-            i.create_transactions(sage_imiport)
+            i.create_transactions(sage_import)
         info('Calculated running bank balance = {}'.format(self.running_bank_balance))
         # Transfer
 
@@ -380,20 +380,23 @@ class AbstractInvoiceLineItem():
     def create_transactions(self, file):
         raise RemittanceException("Abstract type. {}".format(self))
 
+
 class Invoice(AbstractInvoiceLineItem):
     """Normal Invoice"""
 
     def __str__(self):
         return ' Invoice {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
         """This creates transactions such as payments and credits at some later date."""
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.gross_amount > 0:
             comment = ''
-            #Todo this discount calculation should be moved to invoice and also checked.
+            # Todo this discount calculation should be moved to invoice and also checked.
             if self.discount > 0:
-                file.check_write_row('SC', '4009', file.remittance.supplier+' '+self.number,
-                                     file.tran_date,  # Use the file transaction date as this is when the transaction
+                si.detailed_check_write_row('SC', '4009', rd.remittance.supplier+' '+self.number,
+                                     rd.tran_date,  # Use the file transaction date as this is when the transaction
                                      # takes place. Previously (in error) used self.date which is the date the invoice
                                      # was raised.  (Referenced from below)
                                      'Sales Discount '+self.number,
@@ -401,11 +404,11 @@ class Invoice(AbstractInvoiceLineItem):
                                      comment = comment, account = self.customer)
                 # No impact on running bank balance
             cash_in = self.gross_amount-self.discount
-            file.check_write_row('SA', file.bank, file.remittance.supplier+' '+self.number,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Sales Receipt '+self.number,
                                cash_in, 'T9', comment = comment, account = self.customer)
-            file.running_bank_balance += cash_in
+            rd.running_bank_balance += cash_in
         elif self.gross_amount == 0:
             print("Invoice has zero amount which is a little odd. {}".format(self))
         else:
@@ -416,22 +419,24 @@ class AISInvoice(Invoice):
     def __str__(self):
         return ' AIS Invoice {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.net_amount > 0:
             comment = ''
             if self.discount > 0:
-                file.check_write_row('SC', '4009', file.remittance.supplier+' '+self.number,
-                                     file.tran_date,  # see first check_write_row in Invoice.create_transactions
+                si.detailed_check_write_row('SC', '4009', rd.remittance.supplier+' '+self.number,
+                                     rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                      'Sales Discount '+self.number + ' Customer discount',
                                      self.cust_discount, 'T1', tax_amount = self.cust_discount_vat,
                                      comment = comment, account = self.customer)
                 # No impact on running bank balance
             receipt = self.adj_net_receipt + self.ais_discount + self.ais_discount_vat
-            file.check_write_row('SA', file.bank, file.remittance.supplier+' '+self.number,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Sales Receipt '+self.number+' after customer and AIS discounts and adjusted for rounding',
                                  receipt, 'T9', comment = comment, account = self.customer)
-            file.running_bank_balance += receipt
+            rd.running_bank_balance += receipt
         elif self.gross_amount == 0:
             print("Invoice has zero amount which is a little odd. {}".format(self))
         else:
@@ -447,17 +452,19 @@ class AgentInvoice(AbstractInvoiceLineItem):
     def calc_discount(self):
         return 0
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.gross_amount < 0: # The amount is like a credit note but is in fact a positive payment on advance
             comment = ''
             #Todo this discount calculation should be moved to invoice and also checked.
             if p(self.calc_discount()) != 0:
                 raise RemittanceException('Agent Invoice ({}) should not have a discount.'.format(self))
-            file.check_write_row('PA', file.bank, self.member_code+' '+self.number,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('PA', rd.bank, self.member_code+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Sales Receipt '+self.number,
                                  -self.gross_amount, 'T9', comment = comment, account = 'AIS001') # TODO should make variable
-            file.running_bank_balance -= self.gross_amount
+            rd.running_bank_balance -= self.gross_amount
         elif self.gross_amount == 0:
             print("Agent Invoice has zero amount which is odd, {}".format(self))
         else:
@@ -469,23 +476,25 @@ class DebitNote(AbstractInvoiceLineItem):
     def __str__(self):
         return ' Debit Note {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if p(self.net_amount) == p(-315.18): # Todo add check for member code
-            file.check_write_row('PA', file.bank, 'Bentalls',
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('PA', rd.bank, 'Bentalls',
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Bentalls Salary Consultancy '+self.number,
                                  - self.gross_amount, 'T9', comment = 'comment', account = 'BEN001')
-            file.running_bank_balance -= self.gross_amount
+            rd.running_bank_balance -= self.gross_amount
         elif self.net_amount < 0:
             # Todo check that there is not already an entry in 2109 for this credit note
             # todo check and add this entry to the list of debits notes
             # todo notify Treez of this issue
             accrual = -(self.gross_amount - self.discount)
-            tran_type = 'DN '+file.remittance.supplier
+            tran_type = 'DN '+rd.remittance.supplier
             ref_prefix = 'Waiting for reversal; temporarily '+self.number
-            file.write_row('JD', '2109', tran_type, self.date, ref_prefix + ' into accrual', accrual, 'T9')
-            file.write_row('JC', file.bank, tran_type, self.date, ref_prefix + ' from bank account', accrual, 'T9')
-            file.running_bank_balance -= accrual
+            si.detailed_check_write_row('JD', '2109', tran_type, self.date, ref_prefix + ' into accrual', accrual, 'T9')
+            si.detailed_check_write_row('JC', rd.bank, tran_type, self.date, ref_prefix + ' from bank account', accrual, 'T9')
+            rd.running_bank_balance -= accrual
         else:
             raise RemittanceException("Debit note has zero or positive amount which is odd. {}".format(self))
 
@@ -494,20 +503,22 @@ class DebitNoteReversal(AbstractInvoiceLineItem):
     def __str__(self):
         return ' Debit Note Reversal {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.net_amount > 0:
             # Todo check that there is not already an entry in 2109 for this credit note
             # todo check and add this entry to the list of debits notes
             # todo notify Treez of this issue
             comment = 'Manual check that this is reversing a stop note in 2109 then remove xx on type'
             accrual = (self.gross_amount - self.discount)
-            tran_type = 'RDN '+file.remittance.supplier
+            tran_type = 'RDN '+rd.remittance.supplier
             ref_prefix = 'Waiting for reversal; temporarily '+self.number
-            file.write_row('xxJC', '2109', tran_type, self.date, ref_prefix + ' into accrual', accrual,
+            si.detailed_check_write_row('xxJC', '2109', tran_type, self.date, ref_prefix + ' into accrual', accrual,
                            'T9', comment = comment)
-            file.write_row('xxJD', file.bank, tran_type, self.date, ref_prefix + ' from bank account',
+            si.detailed_check_write_row('xxJD', rd.bank, tran_type, self.date, ref_prefix + ' from bank account',
                            accrual, 'T9', comment = comment)
-            file.running_bank_balance += accrual
+            rd.running_bank_balance += accrual
         else:
             raise RemittanceException("Debit note reversal has zero or positive amount which is odd. {}".format(self))
 
@@ -516,23 +527,25 @@ class AISCreditNote(AbstractInvoiceLineItem):
     def __str__(self):
         return ' AIS Credit Note {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.net_amount < 0:
             comment = ''
             # self.check_write_row('SD', '4009', 'AIS', self.tran_date, 'Sales Discount '+r.Reference,
             #           r.Discount2, 'T9', account = r.Customer)
             if self.cust_discount < 0:
-                file.check_write_row('SI', '4009', file.remittance.supplier+' '+self.number,
-                                     file.tran_date,  # see first check_write_row in Invoice.create_transactions
+                si.detailed_check_write_row('SI', '4009', rd.remittance.supplier+' '+self.number,
+                                     rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                      'CN Discount for '+self.number + ' Reverse Customer discount',
                                      - self.cust_discount, 'T1', tax_amount = -self.cust_discount_vat,
                                      comment = comment, account = self.customer)
             receipt = self.adj_net_receipt + self.ais_discount + self.ais_discount_vat
-            file.check_write_row('SP', file.bank, file.remittance.supplier,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('SP', rd.bank, rd.remittance.supplier,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Credit Note '+self.number+ ' After reversing customer and AIS discounts (& rounding)',
                                  - receipt, 'T9', comment = comment, account = self.customer)
-            file.running_bank_balance += receipt
+            rd.running_bank_balance += receipt
         else:
             raise RemittanceException("Credit note has zero or positive amount which is odd. {}".format(self))
 
@@ -542,24 +555,26 @@ class CreditNote(AbstractInvoiceLineItem):
     def __str__(self):
         return ' Credit Note {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.gross_amount < 0:
             comment = ''
             # self.check_write_row('SD', '4009', 'AIS', self.tran_date, 'Sales Discount '+r.Reference,
             #           r.Discount2, 'T9', account = r.Customer)
             if self.calc_discount() < 0:
-                file.write_row('JD', file.bank, 'Discount',
-                               file.tran_date,  # see first check_write_row in Invoice.create_transactions
+                si.detailed_check_write_row('JD', rd.bank, 'Discount',
+                               rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                'CN Discount for '+self.number, -self.calc_discount(), 'T9')
-                file.running_bank_balance -= self.calc_discount()
-                file.write_row('JC', '4009', 'Discount',
-                               file.tran_date,  # see first check_write_row in Invoice.create_transactions
+                rd.running_bank_balance -= self.calc_discount()
+                si.detailed_check_write_row('JC', '4009', 'Discount',
+                               rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                'CN Discount for '+self.number, -self.calc_discount(), 'T9')
-            file.check_write_row('SP', file.bank, file.remittance.supplier,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('SP', rd.bank, rd.remittance.supplier,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                 'Credit Note '+self.number,
                                 - self.invoiced, 'T9', comment = comment, account = self.customer)
-            file.running_bank_balance += self.invoiced
+            rd.running_bank_balance += self.invoiced
         else:
             raise RemittanceException("Credit note has zero or positive amount which is odd. {}".format(self))
 
@@ -582,19 +597,21 @@ class AIS_PPD_Invoice(AbstractInvoiceLineItem):
     def __str__(self):
         return ' AIS PPD Invoice {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.gross_amount < 0:
             comment = ''
-            file.check_write_row('PI', '4009', self.member_code+' '+self.number,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('PI', '4009', self.member_code+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                 'AIS 1% discount {} {}'.format(self.extra_number, self.number),
                                 - self.net_amount, 'T1', tax_amount = -self.vat,
                                 comment = comment, account = 'AIS001')  # TODO should make account variable
-            file.check_write_row('PA', file.bank, file.remittance.supplier,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('PA', rd.bank, rd.remittance.supplier,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'AIS 1% discount {} {}'.format(self.extra_number, self.number),
                                  - self.adj_net_receipt, 'T9', comment = comment, account = 'AIS001')
-            file.running_bank_balance += self.adj_net_receipt
+            rd.running_bank_balance += self.adj_net_receipt
         else:
             raise RemittanceException("AIS PPD Invoice note has zero or negative amount which is odd. {}".format(self))
 
@@ -615,19 +632,21 @@ class AIS_PPD_CreditNote(AbstractInvoiceLineItem):
     def __str__(self):
         return ' AIS PPD Credit Note {}'.format(repr(self))
 
-    def create_transactions(self, file):
+    def create_transactions(self, sage_import_file):
+        rd = sage_import_file
+        si = sage_import_file.sage_import
         if self.gross_amount > 0:
             comment = ''
-            file.check_write_row('PC', '4009', self.member_code+' '+self.number,
-                                 file.tran_date,  # see first check_write_row in Invoice.create_transactions
+            si.detailed_check_write_row('PC', '4009', self.member_code+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'AIS 1% discount '+self.number,
                                  self.net_amount, 'T1', tax_amount = self.vat,
                                  comment = comment, account = 'AIS001')
             # There won't be a credit unless there is more payment so this is aggregated into the PPD Invoice
-            # file.check_write_row('PP', file.bank, file.remittance.supplier, self.date,
+            # si.detailed_check_write_row('PP', rd.bank, rd.remittance.supplier, self.date,
             #                         'AIS 1% discount '+self.number,
             #                         -self.gross_amount, 'T9', comment = comment, account = 'AIS001')
-            # file.running_bank_balance -= self.gross_amount
+            # rd.running_bank_balance -= self.gross_amount
         else:
             raise RemittanceException("AIS PPD Credit note has zero or positive amount which is odd. {}".format(self))
 

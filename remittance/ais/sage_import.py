@@ -16,6 +16,7 @@ class SageImportFile:
     Typically it will run all on the create of the class"""
 
     def __init__(self, remittance, sqldata, name='', file_dir='', auto_run=True, modify_name_if_exists=True):
+        """Typically all the code and action of creating the file is driven from constructor."""
         self.sqldata = sqldata
         self.logger = logging.getLogger('SageImportFile')
         self.logger.info('-- Starting SageImportFile setup')
@@ -35,9 +36,11 @@ class SageImportFile:
         self.logger.info('-- Ending SageImportFile setup')
         if auto_run:
             self.start_file(name, file_dir)
-            # Do it in this order so that the accumulated discount in the returns can be net off against all the sales.
-            self.parse()
-            self.close_file()
+            try:
+                # Do it in this order so that the accumulated discount in the returns can be net off against all the sales.
+                self.parse()
+            finally:
+                self.close_file()
 
     def check_for_transactions_on_this_day(self, tran_type, account):
         test3 = self.sqldata[self.sqldata['TYPE'] == tran_type]
@@ -84,6 +87,7 @@ class SageImportFile:
                                  date, details, net_amount,
                                  tax_code, account='', tax_amount=0.0,
                                  exchange_rate=1, extra_ref='', user_name='H3', comment='', stop_note=''):
+        # Todo this should perhaps move to pySage50
         r = self.check_accruals_for_stop_note(stop_note)
         if r[0]:
             # Error There are transactions when there should be none
@@ -97,25 +101,8 @@ class SageImportFile:
                           tax_code, account=account, tax_amount=tax_amount,
                           exchange_rate=exchange_rate, extra_ref=extra_ref, user_name=user_name, comment=comment)
 
-    def check_write_row(self, tran_type, nominal, reference,
-                        date, details, net_amount,
-                        tax_code, account='', tax_amount=0.0,
-                        exchange_rate=1, extra_ref='', user_name='H3', comment=''):
-        r = self.check_for_transactions_on_this_day(tran_type, nominal)
-        if r[0]:
-            # Error There are transactions when there should be none
-            self.ran_ok = False
-            tran_type = 'xx' + tran_type
-            comment = comment + ' ' + r[2]
-        else:
-            comment = comment + ' :Checked ' + r[2]
-        self.si.write_row(tran_type, nominal, reference,
-                          date, details, net_amount,
-                          tax_code, account=account, tax_amount=tax_amount,
-                          exchange_rate=exchange_rate, extra_ref=extra_ref, user_name=user_name, comment=comment)
-
     def start_file(self, name, file_dir):
-        self.si = SageImport(home_directory=file_dir)
+        self.si = self.sage_import = SageImport(home_directory=file_dir)
         self.si.start_file(name, modify_name_if_exists=self.modify_name_if_exists)
 
     def close_file(self):
