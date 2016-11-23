@@ -80,6 +80,7 @@ class RemittanceDoc():
 
         Public attributes:
         -df: a pandas dataframe representing all the data.
+        TODO Make specific for AIS rather than a general RemittanceDoc
     """
 
     def __iadd__(self, b):
@@ -160,11 +161,12 @@ class RemittanceDoc():
         """
 
         def check_due():
+            # TODO integrate with parser so that knows about type of line
             def check_item(row):
                 value = p(row['Value'])
                 discount = p(row['Discount'])
                 due = p(row['Due'])
-                if due != value - discount:
+                if (due != value - discount) and (row['Document Type'] != 'Rejected'):
                     print('Problem with row ({},{} due != value - discount, {},{},{}'.format(row['Document Type'],
                                                                                              row['Your Ref'],
                                                                                              due, value, discount))

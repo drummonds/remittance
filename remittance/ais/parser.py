@@ -8,14 +8,16 @@ from ..remittance import AIS_PPD_CreditNote, DebitNoteReversal, AISCreditNote, A
 from ..remittance import AIS_PPD_Invoice, DebitNote, AISInvoice
 
 
+# TODO convert print statements to error logging
 class ParseError(Exception):
     pass
+
 
 def dummy_manual_correction(item, row):
     pass
 
 class ParseItems:
-    """This is specific to AIS"""
+    """This is specific to AIS.  It parses the data in the Excel sheet"""
 
     def check_row(self, item, row):
         """Check all the calculated values against the raw data to see if it all agrees"""
@@ -31,31 +33,29 @@ class ParseItems:
                             raise ParseError(
                                 "For invoice {}, Property {} != series {}, values {},{}, types {},{}".format(
                                     row['Your Ref'], prop, series, a, b, type(a), type(b)))
-                            result = False
                 else:  # Allow rounding
                     if not (a.is_nan() and b.is_nan()):
                         if abs(a - b) > 0.01:
                             raise ParseError(
                                 "For invoice {}, Property {} != series {}, values {},{}, types {},{}".format(
                                     row['Your Ref'], prop, series, a, b, type(a), type(b)))
-                            result = False
                         elif (a != b) and correct_rounding:
                             if prop == 'vat':
                                 item.correct_vat_rounding_error(p(row[series]))
                             else:
                                 setattr(item, prop, p(row[series]))
             except AttributeError:
-                result = False
                 raise (ParseError("Item {} doesn't have property {} and should have.".format(row['Your Ref'], prop)))
 
         check_item('net_amount', 'Sage_Net_Amount')
         check_item('vat', 'Sage_VAT_Amount', False, False)  # Thought had a problem but not sure
         check_item('gross_amount', 'Sage_Gross_Amount')
         check_item('discount', 'Discount')
-        return result
+        return True
 
     def parse_row(self, item, row):
-        """The parser decides which type of item. Then this does the generic setup"""
+        """The input is a row from the XLSX spreadsheet that is sent as the remittance advice.
+        The parser decides which type of item. Then this does the generic setup"""
         self.manual_correction(item, row)
         item.vat_rate = row['Sage_Tax_Rate']
         item.number = row['Your Ref']
@@ -138,8 +138,8 @@ class ParseItems:
         elif row['Document Type'] == 'Reverse Stop Note':
             self.parse_row(DebitNoteReversal(), row)
         elif row['Document Type'] == 'Rejected':
-            print("** Line marked by AIS as Rejected will ignore.. Document type = {}.\n In line |{}|".format(
-                row['Document Type'], row))
+            print("** Line marked by AIS as Rejected will be ignored.\n In line |{}|".format(row))
+            # Just not parse it
         else:
             raise RemittanceError("Unrecognised line. Document type = {}.\n In line |{}|".format(
                 row['Document Type'], row))
