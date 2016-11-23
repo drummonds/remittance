@@ -7,4 +7,4 @@ This is a collection of tools that I have used for helping my day to day work wi
 
 ### Installing a module locally
 
-An aide memoire for me You need a command line like this: 'pip install git+file://C:/it/majorprojects/remittance
+An aide memoire for me You need a command line like this: 'pip install git+file://C:/it/majorprojects/remittance'

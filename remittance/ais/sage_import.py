@@ -15,12 +15,13 @@ class SageImportFile:
     create a file ready for Sage Import.
     Typically it will run all on the create of the class"""
 
-    def __init__(self, remittance, sqldata, name='', file_dir='', auto_run=True):
+    def __init__(self, remittance, sqldata, name='', file_dir='', auto_run=True, modify_name_if_exists=True):
         self.sqldata = sqldata
         self.logger = logging.getLogger('SageImportFile')
         self.logger.info('-- Starting SageImportFile setup')
         self.remittance = remittance
         self.tran_date = self.remittance.payment_date
+        self.modify_name_if_exists = modify_name_if_exists
         s = self.remittance.supplier.upper()
         if s == 'FENWICK':
             self.bank = '1262'
@@ -115,7 +116,7 @@ class SageImportFile:
 
     def start_file(self, name, file_dir):
         self.si = SageImport(home_directory=file_dir)
-        self.si.start_file(name)
+        self.si.start_file(name, modify_name_if_exists=self.modify_name_if_exists)
 
     def close_file(self):
         self.si.close_file()
