@@ -49,20 +49,26 @@ class SubDocument():
             raise RemittanceError('Cell G{}, |{}| != {}, |{}|'.format(first, top, last, bottom))
         self.sum = p(top)
 
-
     def parse_document(self):
         """Convert document into a dataframe
 
         Also need to see how measure the size of the table.
         """
-        self.parent.check_document_type(self.parent.parse_row)
+        try:
+            self.parent.check_document_type(self.parent.parse_row)
+        except RemittanceError:  # Allow a couple of extra lines eg comments etc
+            try:
+                self.parent.check_document_type(self.parent.parse_row + 1)
+                self.parent.parse_row += 1
+            except:
+                self.parent.check_document_type(self.parent.parse_row + 2)  # Last chance
+                self.parent.parse_row += 2
         last_row = self.find_last_row()
         self.check_first_and_last_rows_are_copies(self.parent.parse_row+1, last_row+1)
         n = last_row - self.parent.parse_row - 1
         # Note parsing the data means that numeric values are in pence
         self.df = self.parent.xl.parse(skiprows=self.parent.parse_row).head(n+1).tail(n)
         self.parent.parse_row = last_row+4
-
 
     def __init__(self, parent):
         self.parent = parent

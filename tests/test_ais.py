@@ -74,6 +74,14 @@ class AISTestCase(TestCase):
     def test_RemittanceFail(self):
         self.assertRaises(RemittanceError, RemittanceDoc, TEST_DIR.child('163167829_678a.XLSX'))
 
+    def test_RemittanceDoc3(self):
+        """ Cenpac started adding addition comments at top of header so make sure actually can still parse.
+        Added a little flexibility for an extre couple of lines before complaining.
+        There seems to have been a bit of a gap.  Maybe someone complained."""
+        ais_doc = RemittanceDoc(TEST_DIR.child('163967829_686.XLSX'))
+        self.assertEqual(ais_doc.sum_total, p(34348.58))
+        self.assertTrue(ais_doc.checked)
+
 
 if __name__ == '__main__':
     main()
