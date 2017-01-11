@@ -374,16 +374,16 @@ class AbstractInvoiceLineItem():
         self.cust_discount_rate = 0.05
         self.ais_discount_rate = 0.01
 
-    def try_add_string(self, message, field, prefix = ''):
+    def try_add_string(self, field, prefix = ''):
         try:
             result = ''
             value = '{}'.format(getattr(self, field))
-            if message:
-                message += ' '
+            if self._message:
+                self._message += ' '
             if prefix:
                 result +=  prefix + ' '
             result += value
-            message += result
+            self._message += result
             return True
         except AttributeError:
             return False  # message unchanged
@@ -391,18 +391,18 @@ class AbstractInvoiceLineItem():
     def __repr__(self):
         """The reprentation may vary depending on what information has been put in.  You might just have summary
         information or you might have detailed pricing and VAT amount"""
-        s = ''
-        self.try_add_string(s, 'number')
-        self.try_add_string(s, 'date', prefix = 'on')
-        if not self.try_add_string(s, 'amount', prefix = 'for (full amount)'):
-            self.try_add_string(s, 'net_amount', prefix = 'net amount')
-            self.try_add_string(s, 'vat', prefix = 'with VAT')
-        self.try_add_string(s, 'discount', prefix = 'discount:')
-        self.try_add_string(s, 'customer', prefix = 'Customer:')
-        if s == '':
-            s = 'All information is blank'
-        s += '\n'
-        return s
+        self._message = ''
+        self.try_add_string('number')
+        self.try_add_string('date', prefix = 'on')
+        if not self.try_add_string('amount', prefix = 'for (full amount)'):
+            self.try_add_string('net_amount', prefix = 'net amount')
+            self.try_add_string('vat', prefix = 'with VAT')
+        self.try_add_string('discount', prefix = 'discount:')
+        self.try_add_string('customer', prefix = 'Customer:')
+        if self._message == '':
+            self._message = 'All information is blank'
+        self._message += '\n'
+        return self._message
 
     def __str__(self):
         return ' Abstract type {}'.format(repr(self))
