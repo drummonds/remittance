@@ -374,16 +374,33 @@ class AbstractInvoiceLineItem():
         self.cust_discount_rate = 0.05
         self.ais_discount_rate = 0.01
 
-    def __repr__(self):
-        s = '{} on {} for (full price) {} with VAT {}'.format(
-            safe_get(self, 'number'),
-            safe_get(self, 'date'),
-            safe_get(self, 'net_amount'),
-            safe_get(self, 'vat'))
+    def try_add_string(self, message, field, prefix = ''):
         try:
-            s += ' customer = {}'.format(self.customer)
+            result = ''
+            value = getattr(self, field)
+            if message:
+                message += ' '
+            if prefix:
+                result +=  prefix + ' '
+            result += value
+            message += result
+            return True
         except AttributeError:
-            pass
+            return False  # message unchanged
+
+    def __repr__(self):
+        """The reprentation may vary depending on what information has been put in.  You might just have summary
+        information or you might have detailed pricing and VAT amount"""
+        s = ''
+        self.try_add_string(s, 'number')
+        self.try_add_string(s, 'date', prefix = 'on')
+        if not self.try_add_string(s, 'amount', prefix = 'for (full amount)'):
+            self.try_add_string(s, 'net_amount', prefix = 'net amount')
+            self.try_add_string(s, 'vat', prefix = 'with VAT')
+        self.try_add_string(s, 'discount', prefix = 'discount:')
+        self.try_add_string(s, 'customer', prefix = 'Customer:')
+        if s == '':
+            s = 'All information is blank'
         s += '\n'
         return s
 
