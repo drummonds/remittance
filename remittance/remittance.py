@@ -24,6 +24,14 @@ def na(obj, value, default = 'N/A'):
         return default
 
 
+def safe_get(obj, value, default = 'N/A'):
+    try:
+        v = getattr(obj, value)
+        return v
+    except AttributeError:
+        return default
+
+
 class Remittance():
     """ This is a remittance document object and is a representation of the whole thing.
     # This is a holder for a representation of a generalised remittance document and for operations on that.
@@ -367,7 +375,11 @@ class AbstractInvoiceLineItem():
         self.ais_discount_rate = 0.01
 
     def __repr__(self):
-        s = '{} on {} for (full price) {} with VAT {}'.format(self.number, self.date, self.net_amount, self.vat)
+        s = '{} on {} for (full price) {} with VAT {}'.format(
+            safe_get(self, 'number'),
+            safe_get(self, 'date'),
+            safe_get(self, 'net_amount'),
+            safe_get(self, 'vat'))
         try:
             s += ' customer = {}'.format(self.customer)
         except AttributeError:
