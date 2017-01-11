@@ -14,7 +14,7 @@ from dotenv import load_dotenv, find_dotenv
 
 from h3_yearend import p
 from pysage50 import Sage
-from remittance import RemittanceDoc, Remittance, ParseItems, SageImportFile
+from remittance import AISRemittanceDoc, Remittance, ParseItems, SageImportFile
 
 
 BASE_DIR = Path(__file__).ancestor(2)
@@ -54,7 +54,7 @@ class SageTestCase(TestCase):
     def test_sage_enrich(self):
         self.cleanup()
         # Check that a local .env has been set or that their is a production variable.
-        ais_doc = RemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
+        ais_doc = AISRemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
         ais_doc.payment_date = dt.datetime.now()
         self.assertEqual(ais_doc.sum_total, p('3929.82'))
         sage = Sage()

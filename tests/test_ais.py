@@ -11,7 +11,7 @@ from unittest import TestCase, main
 from unipath import Path
 
 from h3_yearend import p
-from remittance import RemittanceDoc, RemittanceError
+from remittance import AISRemittanceDoc, RemittanceError
 
 BASE_DIR = Path(__file__).ancestor(2)
 TEST_DIR = BASE_DIR.child('tests')
@@ -52,13 +52,13 @@ class AISTestCase(TestCase):
     def test_RemittanceDoc(self):
         """Reading in test case and then testing some facts about it.
         """
-        ais_doc = RemittanceDoc(TEST_DIR.child('16267829_609 - test.xls'))
+        ais_doc = AISRemittanceDoc(TEST_DIR.child('16267829_609 - test.xls'))
         self.assertEqual(ais_doc.sum_total, Decimal('10467.92'))
         self.assertEqual(ais_doc.df['Our Ref'][1],160280459)
 
 
     def test_RemittanceDoc2(self):
-        ais_doc = RemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
+        ais_doc = AISRemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
         self.assertEqual(ais_doc.sum_total, p('3929.82'))
         self.assertEqual(len(ais_doc.df), 10)
         self.assertTrue(ais_doc.checked)
@@ -72,13 +72,13 @@ class AISTestCase(TestCase):
 
 
     def test_RemittanceFail(self):
-        self.assertRaises(RemittanceError, RemittanceDoc, TEST_DIR.child('163167829_678a.XLSX'))
+        self.assertRaises(RemittanceError, AISRemittanceDoc, TEST_DIR.child('163167829_678a.XLSX'))
 
     def test_RemittanceDoc3(self):
         """ Cenpac started adding addition comments at top of header so make sure actually can still parse.
         Added a little flexibility for an extre couple of lines before complaining.
         There seems to have been a bit of a gap.  Maybe someone complained."""
-        ais_doc = RemittanceDoc(TEST_DIR.child('163967829_686.XLSX'))
+        ais_doc = AISRemittanceDoc(TEST_DIR.child('163967829_686.XLSX'))
         self.assertEqual(ais_doc.sum_total, p(34348.58))
         self.assertTrue(ais_doc.checked)
 

@@ -75,7 +75,7 @@ class SubDocument():
         self.parse_document()
 
 
-class RemittanceDoc():
+class AISRemittanceDoc():
     """Object for parsing AIS Remittance
 
         The AIS transmision summary is a remittance advice and provides a breakdown of all the invoices and
@@ -102,7 +102,6 @@ class RemittanceDoc():
         self.sum_total += b.sum_total
         return self
 
-
     def parse_title(self):
         self.title = self.sheet.cell_value(2,1)
         regex = re.compile('(\d+).+?(\d+)', re.VERBOSE)
@@ -113,7 +112,6 @@ class RemittanceDoc():
             self.year = g[1]
         except AttributeError:
             raise RemittanceError('Parse title found no match')
-
 
     def parse_summary(self):
         self.sum_invoices = p(self.sheet.cell_value(12,1))

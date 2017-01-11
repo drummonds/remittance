@@ -9,7 +9,7 @@ from .remittance import RemittanceException, Remittance, Invoice, DebitNote, Age
 from .remittance_doc import RemittanceDoc
 from .metadata import version
 
-from .ais import RemittanceDoc, RemittanceError
+from .ais import AISRemittanceDoc, RemittanceError
 from .ais import ParseError, ParseItems
 from .ais import SageImportFile
 
