@@ -377,7 +377,7 @@ class AbstractInvoiceLineItem():
     def try_add_string(self, message, field, prefix = ''):
         try:
             result = ''
-            value = getattr(self, field)
+            value = '{}'.format(getattr(self, field))
             if message:
                 message += ' '
             if prefix:

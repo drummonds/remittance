@@ -56,7 +56,6 @@ class AISTestCase(TestCase):
         self.assertEqual(ais_doc.sum_total, Decimal('10467.92'))
         self.assertEqual(ais_doc.df['Our Ref'][1],160280459)
 
-
     def test_RemittanceDoc2(self):
         ais_doc = AISRemittanceDoc(TEST_DIR.child('163167829_678.XLSX'))
         self.assertEqual(ais_doc.sum_total, p('3929.82'))
@@ -69,7 +68,6 @@ class AISTestCase(TestCase):
         # ais_doc2 = ais_doc + ais_doc
         # self.assertEqual(ais_doc2.sum_total, p('7859.64'))
         # self.assertEqual(ais_doc.sum_total, p('3929.82'))
-
 
     def test_RemittanceFail(self):
         self.assertRaises(RemittanceError, AISRemittanceDoc, TEST_DIR.child('163167829_678a.XLSX'))
