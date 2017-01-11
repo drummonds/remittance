@@ -13,6 +13,7 @@ from h3_yearend import p
 class RemittanceException(Exception):
     pass
 
+
 def na(obj, value, default = 'N/A'):
     try:
         v = getattr(obj, value)
