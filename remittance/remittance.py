@@ -427,6 +427,51 @@ class Invoice(AbstractInvoiceLineItem):
         else:
             raise RemittanceException("Invoice has negative amount which is definitely odd. {}".format(self))
 
+class InvoiceReversal(AbstractInvoiceLineItem):
+    """Reverse of normal Invoice"""
+    #TODO this should have some check code with them
+
+    def __str__(self):
+        return ' Invoice Reversal {}'.format(repr(self))
+
+    def calc_discount(self):
+        try:
+            #print(' discount = {}, invoiceed = {} amount = {}'.format(self.discount, self.invoiced, self.amount))
+            return self.discount + (self.invoiced + self.amount)
+        except AttributeError:
+            print('<><> Hint: check to make sure UpdateLedgers have been done to include recent invoices.')
+            print('Exception Item = {}'.format(self))
+            raise
+
+    def create_transactions(self, sage_import_file):
+        """This creates transactions such as payments and credits at some later date."""
+        rd = sage_import_file
+        si = sage_import_file.sage_import
+        if self.gross_amount < 0:
+            comment = ''
+            # Todo check that there is not already an entry in 2109 for this credit note
+            # todo check and add this entry to the list of debits notes
+            # todo notify Treez of this issue
+            if self.calc_discount > 0:
+                rd.write_row('JD', si.bank, 'Discount', self.date,
+                                   'Discount for ' + self.number, self.calc_discount(), 'T9')
+                rd.write_row('JC', '4009', 'Discount', self.date,
+                                   'Discount for ' + self.number, self.calc_discount(), 'T9')
+                rd.check_write_row('SP', si.bank, si.remittance.supplier + ' ' + self.number, self.date,
+                                     'Invoice Reversal ' + self.number,
+                                     self.invoiced, 'T9', comment=comment, account=self.customer)
+                # No impact on running bank balance
+            cash_in = self.gross_amount-self.discount
+            si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
+                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
+                                 'Sales Receipt '+self.number,
+                               cash_in, 'T9', comment = comment, account = self.customer)
+            rd.running_bank_balance += cash_in
+        elif self.gross_amount == 0:
+            print("Invoice reversal has positive amount which is a little odd. {}".format(self))
+        else:
+            raise RemittanceException("Invoice reversal has postive amount which is definitely odd. {}".format(self))
+
 class AISInvoice(Invoice):
 
     def __str__(self):
@@ -493,6 +538,7 @@ class DebitNote(AbstractInvoiceLineItem):
         rd = sage_import_file
         si = sage_import_file.sage_import
         if p(self.net_amount) == p(-315.18): # Todo add check for member code
+            # TODO specific to AIS. Make generic and create specific AIS
             si.detailed_check_write_row('PA', rd.bank, 'Bentalls',
                                  rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Bentalls Salary Consultancy '+self.number,
