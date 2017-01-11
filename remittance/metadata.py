@@ -7,11 +7,11 @@ Information describing the project.
 package = 'remittance'
 project = "Python Remittance tools"
 project_no_spaces = project.replace(' ', '')
-version = '0.0.9'
+version = '0.0.10'
 description = 'A pythonic interface to varous remittance docs and Sage eg AIS.'
 authors = ['drummonds']
 authors_string = ', '.join(authors)
 emails = ['hum3@drummond.info']
 license = 'MIT'
-copyright = '2016 ' + authors_string
+copyright = '2016-2017 ' + authors_string
 url = 'https://github.com/drummonds/remittance'
