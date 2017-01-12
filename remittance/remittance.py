@@ -175,7 +175,7 @@ class Remittance():
         sum = 0
         for i in self.items:
             print('Sum,{} = + {} + {}'.format(sum, i.gross_amount, i.discount))
-            sum += i.gross_amount + i.discount
+            sum += i.gross_amount - i.discount
         return sum
 
     def doc_self_check(self):
@@ -509,6 +509,7 @@ class InvoiceReversal(AbstractInvoiceLineItem):
             print("Invoice reversal has positive amount which is a little odd. {}".format(self))
         else:
             raise RemittanceException("Invoice reversal has postive amount which is definitely odd. {}".format(self))
+
 
 class AISInvoice(Invoice):
 
