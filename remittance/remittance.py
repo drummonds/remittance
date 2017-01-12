@@ -6,6 +6,7 @@ This should define a generic remittance document which is a collection of line i
 import datetime as dt
 from logging import debug, info, basicConfig, DEBUG
 import math
+import yaml
 import sys
 
 from h3_yearend import p
@@ -173,8 +174,8 @@ class Remittance():
     def doc_sum(self):
         sum = 0
         for i in self.items:
-            print('Sum,{} = + {} + {}'.format(sum, i.amount, i.discount))
-            sum += i.amount + i.discount
+            print('Sum,{} = + {} + {}'.format(sum, i.gross_amount, i.discount))
+            sum += i.gross_amount + i.discount
         return sum
 
     def doc_self_check(self):
