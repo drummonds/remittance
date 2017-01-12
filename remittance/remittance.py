@@ -188,6 +188,28 @@ class Remittance():
             print('Problem with sum of items = {} but printed total = {}'.format(p(sum), p(self.total)))
         return all_ok
 
+    def create_transactions(self, sage_import_file):
+        """This is to create the bank transfer from this remittance to the bank"""
+        rd = sage_import_file
+        si = sage_import_file.sage_import
+        try:
+            comment = '{} Payment'.format(self.supplier)
+        except:
+            comment = 'Payment for an unnown supplier'
+        try:
+            comment += ' for {}'.format(self.supplier_reference)
+        except:
+            pass  # Missing supplier_reference
+        try:
+            if self.running_bank_balance > 0:
+                rd.write_row('JC', si.bank, 'Discount', self.date,
+                             comment, self.running_bank_balance, 'T9')
+                rd.write_row('JD', '1200', 'Discount', self.date,
+                             comment, self.running_bank_balance, 'T9')
+        except:
+            pass  # If no running bank balance then probably no transactions
+
+
 class AbstractInvoiceLineItem():
     """
     Properties:
@@ -464,7 +486,7 @@ class Invoice(AbstractInvoiceLineItem):
             si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
                                  rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Sales Receipt '+self.number,
-                               cash_in, 'T9', comment = comment, account = self.customer)
+                                        self.gross_amount, 'T9', comment = comment, account = self.customer)
             rd.running_bank_balance += cash_in
         elif self.gross_amount == 0:
             print("Invoice has zero amount which is a little odd. {}".format(self))

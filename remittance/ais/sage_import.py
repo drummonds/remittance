@@ -125,3 +125,4 @@ class SageImportFile:
         for i in self.remittance.items:
             i.create_transactions(self)
             self.logger.info('Calculated running bank balance = {}'.format(self.running_bank_balance))
+        self.remittance.create_transactions(self)  # create final transaction eg bank balance
