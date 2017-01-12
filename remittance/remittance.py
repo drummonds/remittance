@@ -448,7 +448,7 @@ class Invoice(AbstractInvoiceLineItem):
                 calc_discount = self.calc_discount
                 # assume calc_discount as well TODO remove assumption
             else:
-                calc_discount_vat = p(self.discount * self.vat_rate / (1 + self.vat_rate))
+                calc_discount_vat = p(float(self.discount) * self.vat_rate / (1 + self.vat_rate))
                 calc_discount = p(self.discount - calc_discount_vat)
             # The VAT on the discount is recoverable
             if self.discount > 0:
