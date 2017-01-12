@@ -190,7 +190,7 @@ class Remittance():
 
     def create_transactions(self, sage_import_file):
         """This is to create the bank transfer from this remittance to the bank"""
-        rd = sage_import_file
+        sif = sage_import_file
         si = sage_import_file.sage_import
         try:
             comment = '{} Payment'.format(self.supplier)
@@ -201,16 +201,13 @@ class Remittance():
         except:
             pass  # Missing supplier_reference
         # check that it all addes up
-        if p(rd.running_bank_balance) != self.total:
+        if p(sif.running_bank_balance) != self.total:
             raise RemittanceException(
                 ' Running balance ({}) in sage import file does not equal remittance total ({})'.format(
-                    rd.running_balance, self.total))
-        try:
-            if self.total > 0:
-                rd.write_row('JC', si.bank, 'Discount', self.date, comment, self.total, 'T9')
-                rd.write_row('JD', '1200', 'Discount', self.date, comment, self.total, 'T9')
-        except:
-            pass  # If no running bank balance then probably no transactions
+                    sif.running_balance, self.total))
+        if self.total > 0:
+            si.write_row('JC', sif.bank, 'Discount', self.payment_date, comment, self.total, 'T9')
+            si.write_row('JD', '1200', 'Discount', self.payment_date, comment, self.total, 'T9')
 
 
 class AbstractInvoiceLineItem():
