@@ -169,6 +169,23 @@ class Remittance():
         info('Calculated running bank balance = {}'.format(self.running_bank_balance))
         # Transfer
 
+    # For simple documents need a simpler check
+    def doc_sum(self):
+        sum = 0
+        for i in self.items:
+            print('Sum,{} = + {} + {}'.format(sum, i.amount, i.discount))
+            sum += i.amount + i.discount
+        return sum
+
+    def doc_self_check(self):
+        all_ok = True
+        # Make sure sum of items equals total
+        sum = self.doc_sum()
+        if p(self.total) == p(sum):
+            print('Total checked = {}'.format(p(self.total)))
+        else:
+            print('Problem with sum of items = {} but printed total = {}'.format(p(sum), p(self.total)))
+        return all_ok
 
 class AbstractInvoiceLineItem():
     """
@@ -377,7 +394,10 @@ class AbstractInvoiceLineItem():
     def try_add_string(self, field, prefix = ''):
         try:
             result = ''
-            value = '{}'.format(getattr(self, field))
+            if field == 'date':
+                value = getattr(self, field).strftime()
+            else:
+                value = '{}'.format(getattr(self, field))
             if self._message:
                 self._message += ' '
             if prefix:
