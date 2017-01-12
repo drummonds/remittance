@@ -200,12 +200,15 @@ class Remittance():
             comment += ' for {}'.format(self.supplier_reference)
         except:
             pass  # Missing supplier_reference
+        # check that it all addes up
+        if p(rd.running_bank_balance) != self.total:
+            raise RemittanceException(
+                ' Running balance ({}) in sage import file does not equal remittance total ({})'.format(
+                    rd.running_balance, self.total))
         try:
-            if self.running_bank_balance > 0:
-                rd.write_row('JC', si.bank, 'Discount', self.date,
-                             comment, self.running_bank_balance, 'T9')
-                rd.write_row('JD', '1200', 'Discount', self.date,
-                             comment, self.running_bank_balance, 'T9')
+            if self.total > 0:
+                rd.write_row('JC', si.bank, 'Discount', self.date, comment, self.total, 'T9')
+                rd.write_row('JD', '1200', 'Discount', self.date, comment, self.total, 'T9')
         except:
             pass  # If no running bank balance then probably no transactions
 
