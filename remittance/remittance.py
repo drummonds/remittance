@@ -199,7 +199,7 @@ class AbstractInvoiceLineItem():
       not the same.
     - ppd_vat : VAT on ppd_net_amount
     - ppd_gross_amount : The gross amount for PPD
-
+    - discount should be positive.
     """
 
     def _set(self, attrib, value):
@@ -226,7 +226,6 @@ class AbstractInvoiceLineItem():
         # Make the adjustments for rounding
         self._cust_discount = self.discount - self.cust_discount_vat # This is a recalculation as first time
         # cust_discount_vat depends on cust_discount
-
 
     def calculate_discount_amounts(self):
         # Gross customer discount
@@ -444,17 +443,24 @@ class Invoice(AbstractInvoiceLineItem):
         si = sage_import_file.sage_import
         if self.gross_amount > 0:
             comment = ''
-            # Todo this discount calculation should be moved to invoice and also checked.
+            if hasattr(self, 'calc_discount_vat'):
+                calc_discount_vat = self.calc_discount_vat
+                calc_discount = self.calc_discount
+                # assume calc_discount as well TODO remove assumption
+            else:
+                calc_discount_vat = p(self.discount * self.vat_rate / (1 + self.vat_rate))
+                calc_discount = p(self.discount - calc_discount_vat)
+            # The VAT on the discount is recoverable
             if self.discount > 0:
                 si.detailed_check_write_row('SC', '4009', rd.remittance.supplier+' '+self.number,
-                                     rd.tran_date,  # Use the file transaction date as this is when the transaction
-                                     # takes place. Previously (in error) used self.date which is the date the invoice
-                                     # was raised.  (Referenced from below)
-                                     'Sales Discount '+self.number,
-                                     self.discount, 'T1', tax_amount = self.vat,
-                                     comment = comment, account = self.customer)
+                                            rd.tran_date,  # Use the file transaction date as this is when the
+                                            # transaction takes place. Previously (in error) used self.date which is the
+                                            # date the invoice was raised.  (Referenced from below)
+                                            'Sales Discount '+self.number,
+                                            calc_discount, 'T1', tax_amount = calc_discount_vat,
+                                            comment = comment, account = self.customer)
                 # No impact on running bank balance
-            cash_in = self.gross_amount-self.discount
+            cash_in = self.gross_amount - self.discount
             si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
                                  rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                  'Sales Receipt '+self.number,
@@ -671,7 +677,7 @@ class CreditNote(AbstractInvoiceLineItem):
             si.detailed_check_write_row('SP', rd.bank, rd.remittance.supplier,
                                  rd.tran_date,  # see first check_write_row in Invoice.create_transactions
                                 'Credit Note '+self.number,
-                                - self.invoiced, 'T9', comment = comment, account = self.customer)
+                                -self.invoiced, 'T9', comment = comment, account = self.customer)
             rd.running_bank_balance += self.invoiced
         else:
             raise RemittanceException("Credit note has zero or positive amount which is odd. {}".format(self))
