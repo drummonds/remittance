@@ -451,7 +451,7 @@ class Invoice(AbstractInvoiceLineItem):
                                      # takes place. Previously (in error) used self.date which is the date the invoice
                                      # was raised.  (Referenced from below)
                                      'Sales Discount '+self.number,
-                                     self.calc_discount, 'T1', tax_amount = self.calc_discount_vat,
+                                     self.discount, 'T1', tax_amount = self.vat,
                                      comment = comment, account = self.customer)
                 # No impact on running bank balance
             cash_in = self.gross_amount-self.discount
