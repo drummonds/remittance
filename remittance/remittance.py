@@ -395,7 +395,7 @@ class AbstractInvoiceLineItem():
         try:
             result = ''
             if field == 'date':
-                value = getattr(self, field).strftime()
+                value = getattr(self, field).strftime('%Y-%m-%d')
             else:
                 value = '{}'.format(getattr(self, field))
             if self._message:
