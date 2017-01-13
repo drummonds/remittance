@@ -48,7 +48,7 @@ class Invoice(AbstractInvoiceLineItem):
                                           '{} matches invoice {} from {} but discount {} is greater than zero'.format(
                                               p(self.gross_amount), invoice_number, self.customer, self.discount))
         else:  # Paying less the full amount so assuming should be taking advantage of prompt payment
-            self.gross_prompt_payment_discount = p(float(self.invoiced) * remittance_doc.discount_rate)
+            self.gross_prompt_payment_discount = p(float(self.invoiced) * remittance_doc.cust_discount_rate)
             self.net_prompt_payment_discount = p(float(self.gross_prompt_payment_discount) * self.vat_rate
                                                  / (1 + self.vat_rate))
             self.prompt_payment_discount_vat = ((self.gross_prompt_payment_discount)
