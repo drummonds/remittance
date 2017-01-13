@@ -53,7 +53,7 @@ class Invoice(AbstractInvoiceLineItem):
                 raise RemittanceException(
                     'Calculated net payment after prompt payment discount does not match receipt.\n' +
                     '  Invoiced amount        : {}'.format(p(self.invoiced)) +
-                    '  Prompt payment discount: {}'.format(p(self.prompt_payment_discount)) +
+                    '  Prompt payment discount: {}'.format(p(self.gross_prompt_payment_discount)) +
                     '  Calculated net amount  : {}'.format(p(self.calc_net_amount)) +
                     ' On remittance:' +
                     '  Gross amount: {}'.format(p(self.gross_amount)) +
