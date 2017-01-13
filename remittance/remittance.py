@@ -195,7 +195,7 @@ class Remittance():
         try:
             comment = '{} Payment'.format(self.supplier)
         except:
-            comment = 'Payment for an unnown supplier'
+            comment = 'Payment for an unknown supplier'
         try:
             comment += ' for {}'.format(self.supplier_reference)
         except:
@@ -206,8 +206,8 @@ class Remittance():
                 ' Running balance ({}) in sage import file does not equal remittance total ({})'.format(
                     sif.running_balance, self.total))
         if self.total > 0:
-            si.write_row('JC', sif.bank, 'Discount', self.payment_date, comment, self.total, 'T9')
-            si.write_row('JD', '1200', 'Discount', self.payment_date, comment, self.total, 'T9')
+            si.write_row('JC', sif.bank, 'CustomerPayment', self.payment_date, comment, self.total, 'T9')
+            si.write_row('JD', '1200', 'CustomerPayment', self.payment_date, comment, self.total, 'T9')
 
 
 class AbstractInvoiceLineItem():

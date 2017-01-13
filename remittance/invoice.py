@@ -92,9 +92,9 @@ class Invoice(AbstractInvoiceLineItem):
                 # No impact on running bank balance
             cash_in = self.gross_amount - self.discount
             si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
-                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
-                                 'Sales Receipt '+self.number,
-                                        self.gross_amount, 'T9', comment = comment, account = self.customer)
+                                        rd.tran_date,  # see first check_write_row in Invoice.create_transactions
+                                        'Sales Receipt '+self.number,
+                                        self.calc_net_amount, 'T9', comment = comment, account = self.customer)
             rd.running_bank_balance += cash_in
         elif self.gross_amount == 0:
             print("Invoice has zero amount which is a little odd. {}".format(self))
