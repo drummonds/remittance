@@ -53,7 +53,7 @@ class Invoice(AbstractInvoiceLineItem):
                                                  / (1 + self.vat_rate))
             self.prompt_payment_discount_vat = ((self.gross_prompt_payment_discount)
                                                 - p(self.net_prompt_payment_discount))
-            self.calc_net_amount = p(self.invoiced) - p(self.prompt_payment_discount)
+            self.calc_net_amount = p(self.invoiced) - p(self.gross_prompt_payment_discount)
             self.net_cash_in = p(self.gross_amount - self.discount)
             if self.calc_net_amount != self.net_cash_in:
                 raise RemittanceException(
