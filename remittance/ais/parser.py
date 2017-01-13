@@ -4,8 +4,8 @@ from h3_yearend import p
 
 from .ais import RemittanceError
 
-from ..remittance import AIS_PPD_CreditNote, DebitNoteReversal, AISCreditNote, AgentInvoice
-from ..remittance import AIS_PPD_Invoice, DebitNote
+from ..remittance import AIS_PPD_CreditNote, AISCreditNote, AgentInvoice, AIS_PPD_Invoice
+from ..debit_note import DebitNote, DebitNoteReversal
 from ..ais_invoice import AISInvoice
 
 
