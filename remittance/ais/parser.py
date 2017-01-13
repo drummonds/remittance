@@ -5,7 +5,8 @@ from h3_yearend import p
 from .ais import RemittanceError
 
 from ..remittance import AIS_PPD_CreditNote, DebitNoteReversal, AISCreditNote, AgentInvoice
-from ..remittance import AIS_PPD_Invoice, DebitNote, AISInvoice
+from ..remittance import AIS_PPD_Invoice, DebitNote
+from ..ais_invoice import AISInvoice
 
 
 # TODO convert print statements to error logging

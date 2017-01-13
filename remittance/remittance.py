@@ -266,6 +266,11 @@ class AbstractInvoiceLineItem():
         self._set('adj_net', self.gross_amount - self.ppd_vat - self.cust_discount - self.cust_discount_vat
                   - self.ais_discount - self.ais_discount_vat)
 
+    def enrich(self, parent_remittance_doc, sage_doc):
+        """When you get a remittance there is very little information on the actual remittance doc.
+        The information is enriched by getting information from the accounting system"""
+        pass
+
 
     @property
     def net_amount(self):
@@ -453,49 +458,10 @@ class AbstractInvoiceLineItem():
         raise RemittanceException("Abstract type. {}".format(self))
 
 
-class Invoice(AbstractInvoiceLineItem):
-    """Normal Invoice"""
-
-    def __str__(self):
-        return ' Invoice {}'.format(repr(self))
-
-    def create_transactions(self, sage_import_file):
-        """This creates transactions such as payments and credits at some later date."""
-        rd = sage_import_file
-        si = sage_import_file.sage_import
-        if self.gross_amount > 0:
-            comment = ''
-            if hasattr(self, 'calc_discount_vat'):
-                calc_discount_vat = self.calc_discount_vat
-                calc_discount = self.calc_discount
-                # assume calc_discount as well TODO remove assumption
-            else:
-                calc_discount_vat = p(float(self.discount) * self.vat_rate / (1 + self.vat_rate))
-                calc_discount = p(self.discount - calc_discount_vat)
-            # The VAT on the discount is recoverable
-            if self.discount > 0:
-                si.detailed_check_write_row('SC', '4009', rd.remittance.supplier+' '+self.number,
-                                            rd.tran_date,  # Use the file transaction date as this is when the
-                                            # transaction takes place. Previously (in error) used self.date which is the
-                                            # date the invoice was raised.  (Referenced from below)
-                                            'Sales Discount '+self.number,
-                                            calc_discount, 'T1', tax_amount = calc_discount_vat,
-                                            comment = comment, account = self.customer)
-                # No impact on running bank balance
-            cash_in = self.gross_amount - self.discount
-            si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
-                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
-                                 'Sales Receipt '+self.number,
-                                        self.gross_amount, 'T9', comment = comment, account = self.customer)
-            rd.running_bank_balance += cash_in
-        elif self.gross_amount == 0:
-            print("Invoice has zero amount which is a little odd. {}".format(self))
-        else:
-            raise RemittanceException("Invoice has negative amount which is definitely odd. {}".format(self))
 
 class InvoiceReversal(AbstractInvoiceLineItem):
     """Reverse of normal Invoice"""
-    #TODO this should have some check code with them
+    # TODO this should have some check code with them
 
     def __str__(self):
         return ' Invoice Reversal {}'.format(repr(self))
@@ -538,34 +504,6 @@ class InvoiceReversal(AbstractInvoiceLineItem):
         else:
             raise RemittanceException("Invoice reversal has postive amount which is definitely odd. {}".format(self))
 
-
-class AISInvoice(Invoice):
-
-    def __str__(self):
-        return ' AIS Invoice {}'.format(repr(self))
-
-    def create_transactions(self, sage_import_file):
-        rd = sage_import_file
-        si = sage_import_file.sage_import
-        if self.net_amount > 0:
-            comment = ''
-            if self.discount > 0:
-                si.detailed_check_write_row('SC', '4009', rd.remittance.supplier+' '+self.number,
-                                     rd.tran_date,  # see first check_write_row in Invoice.create_transactions
-                                     'Sales Discount '+self.number + ' Customer discount',
-                                     self.cust_discount, 'T1', tax_amount = self.cust_discount_vat,
-                                     comment = comment, account = self.customer)
-                # No impact on running bank balance
-            receipt = self.adj_net_receipt + self.ais_discount + self.ais_discount_vat
-            si.detailed_check_write_row('SA', rd.bank, rd.remittance.supplier+' '+self.number,
-                                 rd.tran_date,  # see first check_write_row in Invoice.create_transactions
-                                 'Sales Receipt '+self.number+' after customer and AIS discounts and adjusted for rounding',
-                                 receipt, 'T9', comment = comment, account = self.customer)
-            rd.running_bank_balance += receipt
-        elif self.gross_amount == 0:
-            print("Invoice has zero amount which is a little odd. {}".format(self))
-        else:
-            raise RemittanceException("Invoice has negative amount which is definitely odd. {}".format(self))
 
 class AgentInvoice(AbstractInvoiceLineItem):
     """This invoice is an invoice from the agent which appears like a credit note"""
