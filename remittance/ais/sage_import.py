@@ -4,6 +4,8 @@ import sys
 
 from pysage50 import SageImport
 
+from ..remittance import RemittanceException
+
 
 def today_as_string():
     now = dt.datetime.now()
@@ -125,4 +127,9 @@ class SageImportFile:
         for i in self.remittance.items:
             i.create_transactions(self)
             self.logger.info('Calculated running bank balance = {}'.format(self.running_bank_balance))
-        self.remittance.create_transactions(self)  # create final transaction eg bank balance
+        try:
+            self.remittance.create_transactions(self)  # create final transaction eg moving bank balance
+        except RemittanceException as err:
+            self.si.write_error_row("**Exception raised during creating final transaction: {}".format(err))
+
+
