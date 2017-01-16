@@ -204,7 +204,7 @@ class Remittance():
         if p(sif.running_bank_balance) != self.total:
             raise RemittanceException(
                 ' Running balance ({}) in sage import file does not equal remittance total ({})'.format(
-                    sif.running_balance, self.total))
+                    sif.running_bank_balance, self.total))
         if self.total > 0:
             si.write_row('JC', sif.bank, 'CustomerPayment', self.payment_date, comment, self.total, 'T9')
             si.write_row('JD', '1200', 'CustomerPayment', self.payment_date, comment, self.total, 'T9')
