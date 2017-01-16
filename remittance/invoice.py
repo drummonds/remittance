@@ -43,7 +43,7 @@ class Invoice(AbstractInvoiceLineItem):
                                               p(self.gross_amount), invoice_number, self.customer, self.discount))
         else:  # Paying less the full amount so assuming should be taking advantage of prompt payment
             self.gross_prompt_payment_discount = p(float(self.invoiced) * remittance_doc.cust_discount_rate)
-            self.net_prompt_payment_discount = p(float(self.gross_prompt_payment_discount) * self.vat_rate
+            self.net_prompt_payment_discount = p(float(self.gross_prompt_payment_discount)
                                                  / (1 + self.vat_rate))
             self.prompt_payment_discount_vat = ((self.gross_prompt_payment_discount)
                                                 - p(self.net_prompt_payment_discount))
@@ -58,6 +58,7 @@ class Invoice(AbstractInvoiceLineItem):
                                                          - self.prompt_payment_discount_vat - self.net_cash_in)
                     self.gross_prompt_payment_discount = (self.net_prompt_payment_discount
                                                           + self.prompt_payment_discount_vat)
+                    self.calc_net_amount = p(self.invoiced) - p(self.gross_prompt_payment_discount)
                 else:  # Discount >= 0.05
                     raise RemittanceException(
                         'Calculated net payment after prompt payment discount does not match receipt.\n' +
