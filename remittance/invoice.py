@@ -50,16 +50,25 @@ class Invoice(AbstractInvoiceLineItem):
             self.calc_net_amount = p(self.invoiced) - p(self.gross_prompt_payment_discount)
             self.net_cash_in = p(self.gross_amount - self.discount)
             if self.calc_net_amount != self.net_cash_in:
-                raise RemittanceException(
-                    'Calculated net payment after prompt payment discount does not match receipt.\n' +
-                    '  Invoiced amount        : {}'.format(p(self.invoiced)) +
-                    '  Prompt payment discount: {}'.format(p(self.gross_prompt_payment_discount)) +
-                    '  Calculated net amount  : {}'.format(p(self.calc_net_amount)) +
-                    ' On remittance:' +
-                    '  Gross amount: {}'.format(p(self.gross_amount)) +
-                    '  Discount: {}'.format(p(self.discount)) +
-                    '  Net Cash: {}'.format(self.net_cash_in)
-                )
+                if abs(self.calc_net_amount - self.net_cash_in) < p(0.05):  # Small rounding error will adjust discount
+                    # to align with actual cash received.
+                    # so self.net_cash_in is assumed to be correct
+                    # & self.invoiced is correct as from accounts
+                    self.net_prompt_payment_discount = p(self.invoiced
+                                                         - self.prompt_payment_discount_vat - self.net_cash_in)
+                    self.gross_prompt_payment_discount = (self.net_prompt_payment_discount
+                                                          + self.prompt_payment_discount_vat)
+                else:  # Discount >= 0.05
+                    raise RemittanceException(
+                        'Calculated net payment after prompt payment discount does not match receipt.\n' +
+                        '  Invoiced amount        : {}'.format(p(self.invoiced)) +
+                        '  Prompt payment discount: {}'.format(p(self.gross_prompt_payment_discount)) +
+                        '  Calculated net amount  : {}'.format(p(self.calc_net_amount)) +
+                        ' On remittance:' +
+                        '  Gross amount: {}'.format(p(self.gross_amount)) +
+                        '  Discount: {}'.format(p(self.discount)) +
+                        '  Net Cash: {}'.format(self.net_cash_in)
+                    )
         enrich_field(sage, self, 'outstanding', 'OUTSTANDING')
         if self.outstanding == p(0) and self.gross_amount > 0:
             raise RemittanceException(
