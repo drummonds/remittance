@@ -125,7 +125,10 @@ class SageImportFile:
         # Create running balance
         self.running_bank_balance = 0
         for i in self.remittance.items:
-            i.create_transactions(self)
+            try:
+                i.create_transactions(self)
+            except RemittanceException as err:
+                self.si.write_error_row("**Exception raised during item: {}".format(err))
             self.logger.info('Calculated running bank balance = {}'.format(self.running_bank_balance))
         try:
             self.remittance.create_transactions(self)  # create final transaction eg moving bank balance
