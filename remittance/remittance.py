@@ -542,7 +542,7 @@ class AISCreditNote(AbstractInvoiceLineItem):
     def create_transactions(self, sage_import_file):
         rd = sage_import_file
         si = sage_import_file.sage_import
-        if self.net_amount < 0:
+        if self.gross_amount < 0:
             comment = ''
             # self.check_write_row('SD', '4009', 'AIS', self.tran_date, 'Sales Discount '+r.Reference,
             #           r.Discount2, 'T9', account = r.Customer)

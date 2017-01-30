@@ -30,7 +30,7 @@ class DebitNote(AbstractInvoiceLineItem):
                                         'Bentalls Salary Consultancy '+self.number,
                                         cash_out, 'T9', comment = 'comment', account = 'BEN001')
             rd.running_bank_balance -= self.gross_amount
-        elif self.net_amount < 0:
+        elif self.gross_amount < 0:
             # Todo check that there is not already an entry in 2109 for this credit note
             # todo check and add this entry to the list of debits notes
             # todo notify Treez of this issue
