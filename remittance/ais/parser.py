@@ -1,6 +1,6 @@
 import math
 
-from h3_yearend import p
+from luca import p
 
 from .ais import RemittanceError
 

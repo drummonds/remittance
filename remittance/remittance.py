@@ -9,7 +9,7 @@ import math
 import yaml
 import sys
 
-from h3_yearend import p
+from luca import p
 
 class RemittanceException(Exception):
     pass

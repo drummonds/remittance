@@ -19,7 +19,7 @@ Available functions:
 
 """
 from decimal import Decimal, InvalidOperation
-from h3_yearend import p
+from luca import p
 import pandas as pd
 import re
 from sys import exc_info

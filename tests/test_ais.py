@@ -10,7 +10,7 @@ from pandas.util.testing import assert_series_equal
 from unittest import TestCase, main
 from unipath import Path
 
-from h3_yearend import p
+from luca import p
 from remittance import AISRemittanceDoc, RemittanceError
 
 BASE_DIR = Path(__file__).ancestor(2)
@@ -42,7 +42,7 @@ class AISTestCase(TestCase):
         """ Testing ability to iterate over a series of data
         """
         assert_series_equal(pd.Series([Decimal('0.50'), Decimal('0.51'), Decimal('0.51')]),
-                            p(pd.Series(np.arange(0.50, 0.51, 0.005))), "Testing p works on Series")
+                            pd.Series(p(pd.Series(np.arange(0.50, 0.51, 0.005)))), "Testing p works on Series")
 
     def test_p_other(self):
         """ Testing error handling for wrong data types
