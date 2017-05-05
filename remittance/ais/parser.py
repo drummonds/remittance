@@ -151,7 +151,7 @@ class ParseItems:
         # TODO implementation of manual_correct is not clean.  Needs to be done in a cleaner fashion
         # eg a transform of the doc.df to another variant with manual corrections applied.
         self.manual_correction = manual_correction
-        doc_date = doc.payment_date
+        self.doc_date = doc.payment_date
         remittance.payment_date = doc.payment_date
         remittance.supplier = 'AIS'
         remittance.total = doc.sum_total
@@ -172,7 +172,11 @@ class ParseItems2(ParseItems):
         self.manual_correction(item, row)
         item.number = row['Your Ref']
         item.extra_number = row['Our Ref']
-        item.date = row['Invoice Date']
+        item.date = self.doc_date  # This is the date when all the transactions in contra account should take place. 
+        item.remittance_item_date = row['Invoice Date']  # Date of invoice or transaction this is NOT the date it will
+        print('remittance date = |{}|, type = {}'.format(item.remittance_item_date, type(item.remittance_item_date)))
+        # be paid in on
+        # nor is it the other items should be created
         item.member_code = row['Member Code']  # this is not perfect and should perhaps have a more generic name
         # eg sub supplier code.  There should be a one to one correspondence between this code and our supplier
         # codes.  this should tally with code from the reference.

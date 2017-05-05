@@ -7,7 +7,7 @@ Information describing the project.
 package = 'remittance'
 project = "Python Remittance tools"
 project_no_spaces = project.replace(' ', '')
-version = '0.0.43'
+version = '0.0.44'
 description = 'A pythonic interface to varous remittance docs and Sage eg AIS.'
 authors = ['drummonds']
 authors_string = ', '.join(authors)
