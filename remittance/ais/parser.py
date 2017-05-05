@@ -159,3 +159,28 @@ class ParseItems:
 
     def report_df(self):
         return self.doc.df
+    
+class ParseItems2(ParseItems):
+    """This is specific to AIS.  It parses the data in the Excel sheet.
+    This does not use any enrichment from accounting system.  Used to be Sage.
+    Once Sage is finally removed this can be renamed back to ParseItems."""
+
+    def parse_row(self, item, row):
+        """The input is a row from the XLSX spreadsheet that is sent as the remittance advice.
+        The parser decides which type of item. Then this does the generic setup.
+        At this stage it is not able to cross check against the accounting entries."""
+        self.manual_correction(item, row)
+        item.number = row['Your Ref']
+        item.extra_number = row['Our Ref']
+        item.date = row['Invoice Date']
+        item.member_code = row['Member Code']  # this is not perfect and should perhaps have a more generic name
+        # eg sub supplier code.  There should be a one to one correspondence between this code and our supplier
+        # codes.  this should tally with code from the reference.
+        # print('Member code = {}, {}, MC {}, Ref {}'.format(item.member_code, type(item.member_code),
+        #                                        row['Member Code'], row['Your Ref']))
+        item._gross_amount = p(abs(row['Value']))  # Make sure gross amounts are positive even
+        # if marked as CR eg for Debit notes
+        item._discount = p(abs(row['Discount']))
+        #  This is an incomplete record - so for instance the customer is not known.
+        self.remittance.append(item)
+
