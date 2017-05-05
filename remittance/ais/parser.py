@@ -174,7 +174,6 @@ class ParseItems2(ParseItems):
         item.extra_number = row['Our Ref']
         item.date = self.doc_date  # This is the date when all the transactions in contra account should take place. 
         item.remittance_item_date = row['Invoice Date']  # Date of invoice or transaction this is NOT the date it will
-        print('remittance date = |{}|, type = {}'.format(item.remittance_item_date, type(item.remittance_item_date)))
         # be paid in on
         # nor is it the other items should be created
         item.member_code = row['Member Code']  # this is not perfect and should perhaps have a more generic name
