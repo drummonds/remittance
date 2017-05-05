@@ -13,6 +13,6 @@ from .remittance_doc import RemittanceDoc
 from .metadata import version
 
 from .ais import AISRemittanceDoc, RemittanceError
-from .ais import ParseError, ParseItems
+from .ais import ParseError, ParseItems, ParseItems2
 from .ais import SageImportFile
 
