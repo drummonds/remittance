@@ -71,6 +71,16 @@ class SageTestCase(TestCase):
             move(path + '\\' + fn, path + '\\Archive\\' + fn)
             self.logger.info('Done')
 
+    def test_new_remittance_format(self):
+        self.cleanup()
+        # Check that a local .env has been set or that their is a production variable.
+        ais_doc = AISRemittanceDoc(TEST_DIR.child('171867829_721.XLSX'))
+        ais_doc.payment_date = dt.datetime.now()
+        self.assertEqual(ais_doc.sum_total, p('3513.13'))
+        sage = Sage()
+        sage.enrich_remittance_doc(ais_doc)
+        assert ais_doc.checked
+        
 
 if __name__ == '__main__':
     main()

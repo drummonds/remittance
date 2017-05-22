@@ -151,10 +151,15 @@ class AISRemittanceDoc():
             raise RemittanceError('Document sum {} not equal to summary at top {}'.format(sum, self.sum_total))
 
     def check(self):
+        """check that cell B6 has the correct address.  The address changed on 2017-03-31 from address 1 to address2.
+        Raises an error if check is not successful.
+        """
         value = self.sheet.cell_value(5,1)
         address1 = 'RANKIN HOUSE'
-        if value != address1:
-            raise RemittanceError('Cell B6 = {} is not {}'.format(value,address1))
+        address2 = 'SLUMBERFLEECE LTD'
+        possible_addresses = (address1, address2)
+        if value not in (possible_addresses):
+            raise RemittanceError('Cell B6 = {} is not in {}'.format(value, possible_addresses))
 
 
     def __init__(self, filename):
