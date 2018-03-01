@@ -20,7 +20,6 @@ def dist():
     clean()
     local('python setup.py sdist')
     local('python setup.py bdist_wheel')
-    dir_list('dist')
 
 
 @task(alias="r")
