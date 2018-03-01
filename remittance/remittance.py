@@ -9,7 +9,7 @@ import math
 import yaml
 import sys
 
-from luca import p
+from .utils import p
 
 class RemittanceException(Exception):
     pass
@@ -161,12 +161,12 @@ class Remittance():
                     self.check_PPD()]):
             raise RemittanceException('Self check of remittance failed')
 
-    def parse(self, sage_import):
+    def parse(self, remittance_import):
         # Create all the transactions into the group account
         # Create running balance
         self.running_bank_balance = 0
         for i in self.items:
-            i.create_transactions(sage_import)
+            i.create_transactions(remittance_import)
         info('Calculated running bank balance = {}'.format(self.running_bank_balance))
         # Transfer
 
@@ -188,10 +188,10 @@ class Remittance():
             print('Problem with sum of items = {} but printed total = {}'.format(p(sum), p(self.total)))
         return all_ok
 
-    def create_transactions(self, sage_import_file):
+    def create_transactions(self, remittance_import_file):
         """This is to create the bank transfer from this remittance to the bank"""
-        sif = sage_import_file
-        si = sage_import_file.sage_import
+        sif = remittance_import_file
+        si = remittance_import_file.sage_import
         try:
             comment = '{} Payment'.format(self.supplier)
         except:
@@ -203,7 +203,7 @@ class Remittance():
         # check that it all addes up
         if p(sif.running_bank_balance) != self.total:
             raise RemittanceException(
-                ' Running balance ({}) in sage import file does not equal remittance total ({})'.format(
+                ' Running balance ({}) in remittance import file does not equal remittance total ({})'.format(
                     sif.running_bank_balance, self.total))
         if self.total > 0:
             si.write_row('JC', sif.bank, 'CustomerPayment', self.payment_date, comment, self.total, 'T9')

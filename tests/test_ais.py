@@ -10,8 +10,7 @@ from pandas.util.testing import assert_series_equal
 from unittest import TestCase, main
 from unipath import Path
 
-from luca import p
-from remittance import AISRemittanceDoc, RemittanceError
+from remittance import AISRemittanceDoc, RemittanceError, p
 
 BASE_DIR = Path(__file__).ancestor(2)
 TEST_DIR = BASE_DIR.child('tests')

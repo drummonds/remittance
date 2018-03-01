@@ -1,79 +1,25 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
 
-import os
-import sys
-import imp
-import subprocess
-import platform
+"""The setup script."""
 
 from setuptools import setup, find_packages
 
+with open('README.rst') as readme_file:
+    readme = readme_file.read()
 
-# Add the current directory to the module search path.
-sys.path.append('.')
+with open('HISTORY.rst') as history_file:
+    history = history_file.read()
 
-# # Constants
-CODE_DIRECTORY = 'remittance'
-# DOCS_DIRECTORY = 'docs'
-TESTS_DIRECTORY = 'tests'
-#DATA_DIRECTORY = 'gnucash_books'
-PYTEST_FLAGS = ['--doctest-modules']
+requirements = [ ]
 
-# define install_requires for specific Python versions
-python_version_specific_requires = []
+setup_requirements = [ ]
 
+test_requirements = [ ]
 
-def read(filename):
-    """Return the contents of a file.
-
-    :param filename: file path
-    :type filename: :class:`str`
-    :return: the file's content
-    :rtype: :class:`str`
-    """
-    with open(os.path.join(os.path.dirname(__file__), filename)) as f:
-        return f.read()
-
-
-# Import metadata. Normally this would just be:
-#
-# from luca import metadata
-#
-# However, when we do this, we also import `luca/__init__.py'. If this
-# imports names from some other modules and these modules have third-party
-# dependencies that need installing (which happens after this file is run), the
-# script will crash. What we do instead is to load the metadata module by path
-# instead, effectively side-stepping the dependency problem. Please make sure
-# metadata has no dependencies, otherwise they will need to be added to
-# the setup_requires keyword.
-metadata = imp.load_source(
-    'metadata', os.path.join(CODE_DIRECTORY, 'metadata.py'))
-
-# as of Python >= 2.7 and >= 3.2, the argparse module is maintained within
-# the Python standard library, otherwise we install it as a separate package
-# if sys.version_info < (2, 7) or (3, 0) <= sys.version_info < (3, 3):
-#     python_version_specific_requires.append('argparse')
-
-
-# See here for more options:
-# <http://pythonhosted.org/setuptools/setuptools.html>
-
-setup_dict = dict(
-    name=metadata.package,
-    version=metadata.version,
-    author=metadata.authors[0],
-    author_email=metadata.emails[0],
-    maintainer=metadata.authors[0],
-    maintainer_email=metadata.emails[0],
-    url=metadata.url,
-    description=metadata.description,
-    long_description=read('README.md'),
-    keywords=['Sage', 'python', 'binding', 'interface', ],
-    license='MIT',
-    platforms='any',
-    # Find a list of classifiers here:
-    # <http://pypi.python.org/pypi?%3Aaction=list_classifiers>
+setup(
+    author="Humphrey Drummond",
+    author_email='hum3@drummond.info',
     classifiers=[
         'Development Status :: 3 - pre Beta',
         'Environment :: Console',
@@ -88,19 +34,18 @@ setup_dict = dict(
         'Topic :: Office/Business :: Financial :: Accounting',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    packages=find_packages(exclude=(TESTS_DIRECTORY, )),
-    install_requires=[
-#                         'sqlite3',
-#                         'pandas',
-                     ] + python_version_specific_requires,
-    # console=['scripts/piecash_ledger.py','scripts/piecash_toqif.py'],
-    scripts=[],
-    zip_safe=False,  # don't use eggs
+    description="A framework to model remittances.  Useful for writing software to process remittances.",
+    install_requires=requirements,
+    license="MIT license",
+    long_description=readme + '\n\n' + history,
+    include_package_data=True,
+    keywords='remittance',
+    name='remittance',
+    packages=find_packages(include=['remittance']),
+    setup_requires=setup_requirements,
+    test_suite='tests',
+    tests_require=test_requirements,
+    url='https://github.com/drummonds/remittance',
+    version='0.0.46',
+    zip_safe=False,
 )
-
-def main():
-    setup(**setup_dict)
-
-
-if __name__ == '__main__':
-    main()

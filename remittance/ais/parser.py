@@ -1,13 +1,12 @@
 import math
 
-from luca import p
 
 from .ais import RemittanceError
 
 from ..remittance import AIS_PPD_CreditNote, AISCreditNote, AgentInvoice, AIS_PPD_Invoice
 from ..debit_note import DebitNote, DebitNoteReversal
 from ..ais_invoice import AISInvoice
-
+from ..utils import p
 
 # TODO convert print statements to error logging
 class ParseError(Exception):
@@ -159,7 +158,7 @@ class ParseItems:
 
     def report_df(self):
         return self.doc.df
-    
+
 class ParseItems2(ParseItems):
     """This is specific to AIS.  It parses the data in the Excel sheet.
     This does not use any enrichment from accounting system.  Used to be Sage.
@@ -172,7 +171,7 @@ class ParseItems2(ParseItems):
         self.manual_correction(item, row)
         item.number = row['Your Ref']
         item.extra_number = row['Our Ref']
-        item.date = self.doc_date  # This is the date when all the transactions in contra account should take place. 
+        item.date = self.doc_date  # This is the date when all the transactions in contra account should take place.
         item.remittance_item_date = row['Invoice Date']  # Date of invoice or transaction this is NOT the date it will
         # be paid in on
         # nor is it the other items should be created

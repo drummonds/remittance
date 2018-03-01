@@ -2,8 +2,6 @@ import datetime as dt
 import logging
 import sys
 
-from pysage50 import SageImport
-
 from ..remittance import RemittanceException
 
 

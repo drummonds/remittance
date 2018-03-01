@@ -1,8 +1,7 @@
 from .remittance import RemittanceException
 from .remittance import AbstractInvoiceLineItem
 from .utilities import enrich_field
-
-from luca import p
+from .utils import p
 
 
 class Invoice(AbstractInvoiceLineItem):
