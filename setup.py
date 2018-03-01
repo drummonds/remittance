@@ -21,7 +21,7 @@ setup(
     author="Humphrey Drummond",
     author_email='hum3@drummond.info',
     classifiers=[
-        'Development Status :: 3 - pre Beta',
+        'Development Status :: 4 - Beta',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Intended Audience :: Financial and Insurance Industry',
